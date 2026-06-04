@@ -27,6 +27,6 @@ FilmQZ aims to make film education more accessible and enjoyable by helping user
 
 ## Creator
 
-Created by **Hayk Stambolyan**, a film and media student passionate about cinema, storytelling, and film education.
+Created by **Hayk Stambolyan**, a film and media student.
 
 Learn. Test. Improve.
