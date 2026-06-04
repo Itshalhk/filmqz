@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FilmQZ — Test Your Film Knowledge</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --bg3: #1a1a1a;
+    --card: #141414;
+    --border: #2a2a2a;
+    --gold: #c9a84c;
+    --gold-light: #e8c96d;
+    --red: #c0392b;
+    --white: #f0ece4;
+    --gray: #888;
+    --gray-light: #bbb;
+    --correct: #27ae60;
+    --wrong: #c0392b;
+    --progress: #c9a84c;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body {
+    background:var(--bg);
+    color:var(--white);
+    font-family:'DM Sans',sans-serif;
+    min-height:100vh;
+    line-height:1.6;
+  }
+  h1,h2,h3 { font-family:'DM Serif Display',serif; }
+
+  /* NAV */
+  nav {
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    padding:0 2rem;
+    height:64px;
+    display:flex; align-items:center; justify-content:space-between;
+    background:rgba(10,10,10,0.92);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+  }
+  .logo {
+    font-family:'DM Serif Display',serif;
+    font-size:1.5rem;
+    color:var(--gold);
+    cursor:pointer;
+    letter-spacing:1px;
+  }
+  .logo span { color:var(--white); }
+  nav .nav-links { display:flex; gap:1.5rem; align-items:center; }
+  nav .nav-links a {
+    color:var(--gray-light);
+    text-decoration:none;
+    font-size:.9rem;
+    font-weight:500;
+    transition:color .2s;
+    cursor:pointer;
+  }
+  nav .nav-links a:hover { color:var(--gold); }
+  .btn {
+    display:inline-flex; align-items:center; gap:.5rem;
+    padding:.7rem 1.6rem;
+    border-radius:6px;
+    font-family:'DM Sans',sans-serif;
+    font-weight:600;
+    font-size:.95rem;
+    cursor:pointer;
+    transition:all .2s;
+    border:none;
+    text-decoration:none;
+  }
+  .btn-gold {
+    background:var(--gold);
+    color:#000;
+  }
+  .btn-gold:hover { background:var(--gold-light); transform:translateY(-1px); }
+  .btn-outline {
+    background:transparent;
+    color:var(--white);
+    border:1px solid var(--border);
+  }
+  .btn-outline:hover { border-color:var(--gold); color:var(--gold); }
+  .btn-ghost {
+    background:transparent; color:var(--gray-light); border:none;
+  }
+  .btn-ghost:hover { color:var(--white); }
+
+  /* PAGES */
+  .page { display:none; padding-top:64px; min-height:100vh; }
+  .page.active { display:block; }
+
+  /* HOME */
+  #page-home {
+    background:var(--bg);
+  }
+  .hero {
+    padding:8rem 2rem 5rem;
+    max-width:900px;
+    margin:0 auto;
+    text-align:center;
+  }
+  .hero-label {
+    display:inline-block;
+    padding:.3rem 1rem;
+    background:rgba(201,168,76,.12);
+    border:1px solid rgba(201,168,76,.3);
+    border-radius:100px;
+    color:var(--gold);
+    font-size:.8rem;
+    font-weight:600;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    margin-bottom:1.5rem;
+  }
+  .hero h1 {
+    font-size:clamp(2.2rem,5vw,4rem);
+    line-height:1.15;
+    margin-bottom:1.2rem;
+    color:var(--white);
+  }
+  .hero h1 em { color:var(--gold); font-style:italic; }
+  .hero p {
+    font-size:1.15rem;
+    color:var(--gray-light);
+    max-width:580px;
+    margin:0 auto 2.5rem;
+  }
+  .hero-cta { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+  .film-strip {
+    width:100%; height:6px;
+    background:repeating-linear-gradient(90deg,var(--gold) 0,var(--gold) 20px,transparent 20px,transparent 30px);
+    opacity:.3;
+    margin:4rem 0 0;
+  }
+
+  /* SECTIONS GRID */
+  .sections-grid {
+    max-width:1100px;
+    margin:0 auto;
+    padding:4rem 2rem;
+  }
+  .section-title {
+    text-align:center;
+    margin-bottom:2.5rem;
+  }
+  .section-title h2 { font-size:2rem; margin-bottom:.5rem; }
+  .section-title p { color:var(--gray); }
+
+  .cards-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:1.5rem;
+  }
+  .card {
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:1.8rem;
+    cursor:pointer;
+    transition:all .25s;
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before {
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:3px;
+    background:var(--gold);
+    transform:scaleX(0);
+    transform-origin:left;
+    transition:transform .3s;
+  }
+  .card:hover { border-color:var(--gold); transform:translateY(-3px); box-shadow:0 12px 40px rgba(201,168,76,.1); }
+  .card:hover::before { transform:scaleX(1); }
+  .card-icon { font-size:2.2rem; margin-bottom:1rem; }
+  .card h3 { font-size:1.2rem; margin-bottom:.5rem; }
+  .card p { color:var(--gray); font-size:.9rem; line-height:1.5; }
+
+  /* HOW IT WORKS */
+  .how-it-works {
+    background:var(--bg2);
+    border-top:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+    padding:4rem 2rem;
+  }
+  .steps {
+    max-width:900px;
+    margin:2rem auto 0;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:2rem;
+    text-align:center;
+  }
+  .step-num {
+    width:48px; height:48px;
+    border-radius:50%;
+    background:rgba(201,168,76,.15);
+    border:1px solid var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'DM Serif Display',serif;
+    font-size:1.3rem;
+    color:var(--gold);
+    margin:0 auto 1rem;
+  }
+  .step h4 { margin-bottom:.3rem; }
+  .step p { color:var(--gray); font-size:.875rem; }
+
+  /* FOOTER */
+  footer {
+    background:var(--bg);
+    border-top:1px solid var(--border);
+    padding:2rem;
+    text-align:center;
+    color:var(--gray);
+    font-size:.85rem;
+  }
+  footer .logo { font-size:1.2rem; margin-bottom:.5rem; display:block; cursor:default; }
+
+  /* LEVEL PAGE */
+  #page-level .container, #page-section .container,
+  #page-quiz .container, #page-results .container,
+  #page-review .container, #page-about .container {
+    max-width:900px;
+    margin:0 auto;
+    padding:3rem 2rem;
+  }
+  .page-header { margin-bottom:2.5rem; }
+  .page-header h2 { font-size:2.2rem; margin-bottom:.5rem; }
+  .page-header p { color:var(--gray); }
+  .breadcrumb {
+    display:flex; align-items:center; gap:.5rem;
+    color:var(--gray); font-size:.85rem;
+    margin-bottom:1.5rem;
+  }
+  .breadcrumb span { color:var(--gold); }
+
+  .level-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:1.5rem; }
+  .level-card {
+    background:var(--card);
+    border:2px solid var(--border);
+    border-radius:12px;
+    padding:2rem;
+    cursor:pointer;
+    transition:all .25s;
+    text-align:center;
+  }
+  .level-card:hover, .level-card.selected { border-color:var(--gold); background:#1c1a12; }
+  .level-card .badge {
+    display:inline-block;
+    padding:.25rem .8rem;
+    border-radius:100px;
+    font-size:.75rem;
+    font-weight:700;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    margin-bottom:1rem;
+  }
+  .badge-beginner { background:rgba(39,174,96,.15); color:#2ecc71; border:1px solid #27ae60; }
+  .badge-intermediate { background:rgba(52,152,219,.15); color:#5dade2; border:1px solid #2980b9; }
+  .badge-advanced { background:rgba(192,57,43,.15); color:#e74c3c; border:1px solid #c0392b; }
+  .level-card h3 { font-size:1.4rem; margin-bottom:.5rem; }
+  .level-card p { color:var(--gray); font-size:.9rem; }
+
+  /* QUIZ PAGE */
+  .quiz-header {
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:1.5rem;
+    flex-wrap:wrap; gap:1rem;
+  }
+  .quiz-meta { font-size:.9rem; color:var(--gray); }
+  .quiz-meta strong { color:var(--white); }
+  .progress-bar-wrap {
+    background:var(--bg3); border-radius:100px; height:6px; margin-bottom:2rem; overflow:hidden;
+  }
+  .progress-bar-fill {
+    height:100%; border-radius:100px;
+    background:linear-gradient(90deg,var(--gold),var(--gold-light));
+    transition:width .4s;
+  }
+  .q-number {
+    font-size:.85rem; color:var(--gold); font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:1rem;
+  }
+  .q-text { font-size:1.2rem; font-family:'DM Serif Display',serif; margin-bottom:1.8rem; line-height:1.5; }
+  .options { display:grid; gap:.85rem; }
+  .option {
+    background:var(--bg3);
+    border:1.5px solid var(--border);
+    border-radius:10px;
+    padding:1rem 1.2rem;
+    cursor:pointer;
+    transition:all .2s;
+    display:flex; align-items:center; gap:1rem;
+    font-size:.975rem;
+  }
+  .option:hover { border-color:var(--gold); background:#1c1a12; }
+  .option.selected { border-color:var(--gold); background:rgba(201,168,76,.12); color:var(--white); }
+  .option-letter {
+    width:28px; height:28px; border-radius:50%;
+    background:var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-size:.8rem; font-weight:700;
+    flex-shrink:0;
+    transition:all .2s;
+  }
+  .option.selected .option-letter { background:var(--gold); color:#000; }
+  .quiz-nav {
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top:2rem;
+    flex-wrap:wrap; gap:1rem;
+  }
+  .answered-count { color:var(--gray); font-size:.875rem; }
+  .warning-msg {
+    background:rgba(192,57,43,.15);
+    border:1px solid var(--red);
+    color:#e74c3c;
+    border-radius:8px;
+    padding:.75rem 1rem;
+    margin-top:1rem;
+    font-size:.9rem;
+    display:none;
+  }
+
+  /* RESULTS */
+  .results-hero {
+    text-align:center;
+    padding:2rem 0 2.5rem;
+    border-bottom:1px solid var(--border);
+    margin-bottom:2rem;
+  }
+  .score-circle {
+    width:140px; height:140px;
+    border-radius:50%;
+    border:4px solid var(--gold);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    margin:0 auto 1.5rem;
+    background:rgba(201,168,76,.06);
+  }
+  .score-pct { font-size:2.8rem; font-family:'DM Serif Display',serif; color:var(--gold); line-height:1; }
+  .score-label { font-size:.75rem; color:var(--gray); }
+  .results-hero h2 { font-size:1.6rem; margin-bottom:.5rem; }
+  .results-hero .grade-msg { color:var(--gray-light); font-size:1rem; margin-bottom:1rem; font-style:italic; }
+  .results-stats {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:1rem;
+    margin-bottom:2rem;
+  }
+  .stat-card {
+    background:var(--bg3);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:1.2rem;
+    text-align:center;
+  }
+  .stat-val { font-size:2rem; font-family:'DM Serif Display',serif; }
+  .stat-val.green { color:var(--correct); }
+  .stat-val.red { color:var(--wrong); }
+  .stat-lab { color:var(--gray); font-size:.85rem; }
+  .results-btns { display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; }
+
+  /* REVIEW */
+  .review-item {
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:1.4rem;
+    margin-bottom:1.2rem;
+  }
+  .review-item.correct { border-left:4px solid var(--correct); }
+  .review-item.wrong { border-left:4px solid var(--wrong); }
+  .review-q { font-size:1rem; font-weight:500; margin-bottom:.8rem; }
+  .review-answers { font-size:.875rem; margin-bottom:.7rem; }
+  .review-answers div { margin-bottom:.3rem; }
+  .ans-label { font-weight:600; color:var(--gray); margin-right:.4rem; }
+  .ans-correct { color:var(--correct); }
+  .ans-wrong { color:var(--wrong); }
+  .review-exp {
+    font-size:.85rem;
+    color:var(--gray-light);
+    background:var(--bg2);
+    border-radius:6px;
+    padding:.6rem .8rem;
+    margin-top:.6rem;
+    font-style:italic;
+  }
+  .review-badge {
+    float:right;
+    font-size:.75rem;
+    font-weight:700;
+    padding:.2rem .7rem;
+    border-radius:100px;
+  }
+  .badge-correct { background:rgba(39,174,96,.15); color:#2ecc71; }
+  .badge-wrong { background:rgba(192,57,43,.15); color:#e74c3c; }
+
+  /* ABOUT */
+  .about-content { max-width:700px; }
+  .about-content h2 { font-size:2rem; margin-bottom:1rem; }
+  .about-content p { color:var(--gray-light); margin-bottom:1rem; line-height:1.7; }
+
+  /* RESPONSIVE */
+  @media(max-width:600px) {
+    .hero { padding:5rem 1.2rem 3rem; }
+    .hero h1 { font-size:2rem; }
+    nav .nav-links a:not(.btn) { display:none; }
+    .quiz-nav .btn span { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo" onclick="goHome()">Film<span>QZ</span></div>
+  <div class="nav-links">
+    <a onclick="showPage('page-home')">Home</a>
+    <a onclick="showPage('page-about')">About</a>
+    <a class="btn btn-gold" onclick="startQuiz()">Start Quiz</a>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-label">🎬 Film Industry Quiz Platform</div>
+    <h1>Test your film knowledge.<br><em>Level up</em> your cinema skills.</h1>
+    <p>Choose your level, pick a film section, answer 35 questions, and get your final score.</p>
+    <div class="hero-cta">
+      <button class="btn btn-gold" onclick="startQuiz()" style="font-size:1.05rem;padding:.85rem 2rem;">Start Quiz ›</button>
+      <button class="btn btn-outline" onclick="showPage('page-about')">Learn More</button>
+    </div>
+    <div class="film-strip"></div>
+  </div>
+
+  <div class="sections-grid">
+    <div class="section-title">
+      <h2>Choose Your Path</h2>
+      <p>Six core disciplines of the film industry</p>
+    </div>
+    <div class="cards-grid">
+      <div class="card" onclick="startQuiz()"><div class="card-icon">🎬</div><h3>Producing</h3><p>Budgeting, scheduling, production logistics, and industry roles.</p></div>
+      <div class="card" onclick="startQuiz()"><div class="card-icon">🎥</div><h3>Directing</h3><p>Storytelling, shot design, working with actors, and vision.</p></div>
+      <div class="card" onclick="startQuiz()"><div class="card-icon">🎭</div><h3>Acting</h3><p>Technique, character work, method, and performance craft.</p></div>
+      <div class="card" onclick="startQuiz()"><div class="card-icon">📽️</div><h3>Film Theory</h3><p>Movements, auteur theory, semiotics, and cinema history.</p></div>
+      <div class="card" onclick="startQuiz()"><div class="card-icon">📸</div><h3>Cinematography</h3><p>Camera, lenses, lighting, composition, and visual language.</p></div>
+      <div class="card" onclick="startQuiz()"><div class="card-icon">📣</div><h3>Marketing</h3><p>Distribution, audience targeting, campaigns, and release strategy.</p></div>
+    </div>
+  </div>
+
+  <div class="how-it-works">
+    <div class="section-title">
+      <h2>How It Works</h2>
+      <p>Simple. Fast. Educational.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><h4>Choose Level</h4><p>Beginner, Intermediate, or Advanced</p></div>
+      <div class="step"><div class="step-num">2</div><h4>Choose Section</h4><p>Pick your film discipline</p></div>
+      <div class="step"><div class="step-num">3</div><h4>Answer 35 Questions</h4><p>Navigate freely, save your answers</p></div>
+      <div class="step"><div class="step-num">4</div><h4>Get Your Score</h4><p>Review answers and see your grade</p></div>
+    </div>
+  </div>
+
+  <footer>
+    <span class="logo">Film<span style="color:var(--white)">QZ</span></span>
+    <p>© 2025 FilmQZ — Film Industry Learning & Quiz Platform</p>
+  </footer>
+</div>
+
+<!-- LEVEL PAGE -->
+<div id="page-level" class="page">
+  <div class="container">
+    <div class="breadcrumb">Home › <span>Choose Level</span></div>
+    <div class="page-header">
+      <h2>Choose Your Level</h2>
+      <p>How deep is your film knowledge?</p>
+    </div>
+    <div class="level-cards">
+      <div class="level-card" onclick="selectLevel('Beginner')">
+        <div class="badge badge-beginner">Beginner</div>
+        <h3>Starter</h3>
+        <p>Basic film terms and foundational industry knowledge. Perfect if you're just getting started.</p>
+      </div>
+      <div class="level-card" onclick="selectLevel('Intermediate')">
+        <div class="badge badge-intermediate">Intermediate</div>
+        <h3>Practitioner</h3>
+        <p>Stronger knowledge and practical understanding. For those with some film experience.</p>
+      </div>
+      <div class="level-card" onclick="selectLevel('Advanced')">
+        <div class="badge badge-advanced">Advanced</div>
+        <h3>Professional</h3>
+        <p>Professional-level questions. For serious film students and industry practitioners.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION PAGE -->
+<div id="page-section" class="page">
+  <div class="container">
+    <div class="breadcrumb">Home › <span id="bc-level"></span> › <span>Choose Section</span></div>
+    <div class="page-header">
+      <h2>Choose Your Section</h2>
+      <p>Pick the film discipline you want to be tested on.</p>
+    </div>
+    <div class="cards-grid" id="section-cards">
+      <div class="card" onclick="selectSection('Producing')"><div class="card-icon">🎬</div><h3>Producing</h3><p>Budgeting, scheduling, roles, financing, and production logistics.</p></div>
+      <div class="card" onclick="selectSection('Directing')"><div class="card-icon">🎥</div><h3>Directing</h3><p>Storytelling, blocking, working with actors, and the director's craft.</p></div>
+      <div class="card" onclick="selectSection('Acting')"><div class="card-icon">🎭</div><h3>Acting</h3><p>Technique, method acting, Stanislavski, character development.</p></div>
+      <div class="card" onclick="selectSection('Film Theory')"><div class="card-icon">📽️</div><h3>Film Theory</h3><p>Auteur theory, movements, semiotics, and cinema history.</p></div>
+      <div class="card" onclick="selectSection('Cinematography')"><div class="card-icon">📸</div><h3>Cinematography</h3><p>Camera, lenses, lighting setups, composition, and visual language.</p></div>
+      <div class="card" onclick="selectSection('Marketing')"><div class="card-icon">📣</div><h3>Marketing</h3><p>Distribution, audience targeting, campaigns, and release strategy.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ PAGE -->
+<div id="page-quiz" class="page">
+  <div class="container">
+    <div class="quiz-header">
+      <div class="quiz-meta">
+        <strong id="qz-section"></strong> — <span id="qz-level"></span>
+      </div>
+      <button class="btn btn-ghost" onclick="confirmExit()">✕ Exit Quiz</button>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="q-number" id="q-number"></div>
+    <div class="q-text" id="q-text"></div>
+    <div class="options" id="options"></div>
+    <div class="warning-msg" id="warning-msg">⚠ Please answer all questions before submitting.</div>
+    <div class="quiz-nav">
+      <button class="btn btn-outline" id="btn-prev" onclick="prevQuestion()">← <span>Previous</span></button>
+      <div class="answered-count" id="answered-count"></div>
+      <button class="btn btn-gold" id="btn-next" onclick="nextOrSubmit()"><span>Next</span> →</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS PAGE -->
+<div id="page-results" class="page">
+  <div class="container">
+    <div class="results-hero">
+      <div class="score-circle">
+        <div class="score-pct" id="res-pct"></div>
+        <div class="score-label">SCORE</div>
+      </div>
+      <h2 id="res-title"></h2>
+      <p class="grade-msg" id="res-msg"></p>
+      <p style="color:var(--gray);font-size:.875rem;" id="res-meta"></p>
+    </div>
+    <div class="results-stats">
+      <div class="stat-card"><div class="stat-val green" id="res-correct"></div><div class="stat-lab">Correct</div></div>
+      <div class="stat-card"><div class="stat-val red" id="res-wrong"></div><div class="stat-lab">Wrong</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--gold)" id="res-total">35</div><div class="stat-lab">Total Questions</div></div>
+    </div>
+    <div class="results-btns">
+      <button class="btn btn-gold" onclick="showReview()">Review Answers</button>
+      <button class="btn btn-outline" onclick="startQuiz()">Try Another Quiz</button>
+      <button class="btn btn-outline" onclick="goHome()">Home</button>
+    </div>
+  </div>
+</div>
+
+<!-- REVIEW PAGE -->
+<div id="page-review" class="page">
+  <div class="container">
+    <div class="page-header">
+      <h2>Answer Review</h2>
+      <p id="review-meta"></p>
+    </div>
+    <div id="review-list"></div>
+    <div style="text-align:center;margin-top:2rem;">
+      <button class="btn btn-gold" onclick="startQuiz()">New Quiz</button>
+      <button class="btn btn-outline" onclick="showPage('page-results')" style="margin-left:.8rem">Back to Results</button>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT PAGE -->
+<div id="page-about" class="page">
+  <div class="container">
+    <div class="about-content">
+      <h2>About FilmQZ</h2>
+      <p>FilmQZ is a dedicated film industry learning and quiz platform built for aspiring filmmakers, film students, and cinema enthusiasts who want to test and sharpen their knowledge.</p>
+      <p>With 630 carefully crafted questions across 6 disciplines and 3 difficulty levels, FilmQZ challenges you on everything from basic film terminology to professional-level industry knowledge.</p>
+      <p><strong style="color:var(--gold)">Sections:</strong> Producing · Directing · Acting · Film Theory · Cinematography · Marketing</p>
+      <p><strong style="color:var(--gold)">Levels:</strong> Beginner · Intermediate · Advanced</p>
+      <p>Each quiz contains 35 questions with 4 answer choices. After completing a quiz, you can review every answer with explanations to understand where you went right and where to improve.</p>
+      <div style="margin-top:2rem;">
+        <button class="btn btn-gold" onclick="startQuiz()">Start a Quiz</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  FilmQZ working quiz engine
+//  Generates 630 questions: 6 sections × 3 levels × 35 questions
+// ============================================================
+const SECTIONS = {
+  "Producing": { icon:"🎬", desc:"Budgeting, scheduling, financing, contracts, and production logistics.", topics:[
+    ["What is the producer's main responsibility?", ["Operating the camera", "Overseeing the film from development to distribution", "Only writing dialogue", "Acting in the lead role"], "Overseeing the film from development to distribution", "A producer coordinates the business, creative, and logistical parts of a film."],
+    ["What is pre-production?", ["The planning stage before filming", "The final export", "The first public screening", "The music release"], "The planning stage before filming", "Pre-production includes casting, budgeting, scheduling, locations, crew, and preparation."],
+    ["What is a call sheet?", ["A daily production schedule for cast and crew", "A poster design", "A camera invoice", "A casting contract"], "A daily production schedule for cast and crew", "A call sheet tells everyone when and where they are needed for the shoot day."],
+    ["What does a line producer manage?", ["Daily budget and logistics", "Only the soundtrack", "Only the costumes", "The audience reviews"], "Daily budget and logistics", "The line producer turns the creative plan into a practical, budgeted production."],
+    ["What is a script breakdown?", ["Analyzing the script for cast, props, locations, and needs", "Deleting scenes randomly", "Writing the trailer", "Designing the poster"], "Analyzing the script for cast, props, locations, and needs", "Script breakdowns help producers plan budget, schedule, and resources."],
+    ["What does greenlight mean?", ["Official approval to move forward with production", "A lighting color", "A film festival award", "A camera setting"], "Official approval to move forward with production", "A greenlit project has approval, usually with financing or studio support."],
+    ["What is a release form used for?", ["Getting legal permission to use someone's image, property, or material", "Releasing the movie online", "Ending a shoot day", "Buying camera gear"], "Getting legal permission to use someone's image, property, or material", "Release forms protect the production legally."],
+    ["What is post-production?", ["Editing, sound, VFX, color, and final delivery after filming", "Casting actors", "Finding locations", "Making the first budget only"], "Editing, sound, VFX, color, and final delivery after filming", "Post-production turns filmed material into the finished film."],
+    ["What is a completion bond?", ["Insurance that helps guarantee the film will be completed", "A movie poster", "A music license", "A camera lens"], "Insurance that helps guarantee the film will be completed", "Completion bonds protect investors on many professional productions."],
+    ["What is recoupment?", ["The process of paying back investors from film revenue", "Reshooting a scene", "Changing the cast", "Exporting a trailer"], "The process of paying back investors from film revenue", "Recoupment explains who gets paid back and in what order."],
+    ["What is a distribution deal?", ["An agreement to release the film to audiences", "A set design plan", "An actor rehearsal", "A lens test"], "An agreement to release the film to audiences", "Distribution deals determine where and how the film reaches viewers."],
+    ["What is P&A?", ["Prints and Advertising / release marketing costs", "Props and Actors", "Production and Acting", "Pitch and Approval"], "Prints and Advertising / release marketing costs", "P&A is the money spent to market and release a film."],
+  ]},
+  "Directing": { icon:"🎥", desc:"Creative vision, actor guidance, blocking, visual storytelling, and scene construction.", topics:[
+    ["What is the director's main role?", ["Guiding the creative vision of the film", "Only managing tickets", "Only designing costumes", "Only selling the film"], "Guiding the creative vision of the film", "The director leads performance, tone, blocking, and visual storytelling."],
+    ["What is blocking?", ["Planning actor and camera movement in a scene", "Stopping production", "Editing music", "Writing contracts"], "Planning actor and camera movement in a scene", "Blocking creates clear movement, geography, and emotional focus."],
+    ["What is a master shot?", ["A shot covering the whole scene", "A poster shot", "A deleted shot", "A shot with no actors"], "A shot covering the whole scene", "A master shot gives the editor a complete view of the scene's action."],
+    ["What is mise-en-scène?", ["Everything arranged in the frame", "Only the music", "Only the credits", "Only the camera brand"], "Everything arranged in the frame", "Mise-en-scène includes sets, props, costumes, lighting, actors, and composition."],
+    ["What is coverage?", ["Filming enough angles for editing", "Buying insurance", "Painting the set", "Publishing reviews"], "Filming enough angles for editing", "Coverage gives the editor choices for rhythm, reaction, and emphasis."],
+    ["What is a POV shot?", ["A shot showing what a character sees", "A drone shot", "A producer's invoice", "A scene title"], "A shot showing what a character sees", "POV connects the audience directly to a character's perspective."],
+    ["What is tone?", ["The emotional atmosphere of the film", "Only volume level", "A camera battery", "A contract type"], "The emotional atmosphere of the film", "Tone shapes how the audience feels about the story."],
+    ["What is a shot list?", ["A planned list of shots for filming", "A list of actors' salaries", "A list of reviews", "A list of snacks"], "A planned list of shots for filming", "Directors use shot lists to communicate the visual plan."],
+    ["What is directing actors?", ["Guiding performance, motivation, and behavior", "Choosing ticket prices", "Fixing lenses", "Designing subtitles"], "Guiding performance, motivation, and behavior", "Directors help actors connect choices to the story."],
+    ["What is a long take?", ["A shot lasting unusually long without cutting", "A long script", "A long contract", "A long poster"], "A shot lasting unusually long without cutting", "Long takes can build tension, realism, or choreography."],
+    ["What is visual storytelling?", ["Communicating story through images and actions", "Explaining everything with text", "Only using voice-over", "Only using dialogue"], "Communicating story through images and actions", "Cinema often works best when emotion and story are visible."],
+    ["What is subtext in performance?", ["The hidden meaning under spoken dialogue", "Subtitles only", "End credits", "Camera metadata"], "The hidden meaning under spoken dialogue", "Subtext gives scenes depth because characters often mean more than they say."],
+  ]},
+  "Acting": { icon:"🎭", desc:"Performance technique, character work, emotion, body language, and rehearsal.", topics:[
+    ["What is character motivation?", ["The reason a character acts or wants something", "The camera angle", "The film budget", "The poster text"], "The reason a character acts or wants something", "Motivation makes a performance believable and purposeful."],
+    ["What is improvisation?", ["Creating dialogue or action spontaneously", "Reading a budget", "Editing a scene", "Lighting a set"], "Creating dialogue or action spontaneously", "Improvisation can help actors discover authentic moments."],
+    ["What is an objective in acting?", ["What the character wants in a scene", "A camera lens", "A marketing plan", "A legal contract"], "What the character wants in a scene", "Objectives give actors a playable goal."],
+    ["What is a monologue?", ["A long speech by one character", "A two-person fight", "A camera test", "A music cue"], "A long speech by one character", "Monologues reveal character, conflict, and emotion."],
+    ["What is chemistry between actors?", ["A believable connection on screen", "A science class", "A lighting formula", "A contract rule"], "A believable connection on screen", "Chemistry helps relationships feel alive and convincing."],
+    ["What is rehearsal?", ["Practice before filming or performance", "The final cut", "A poster campaign", "A distribution contract"], "Practice before filming or performance", "Rehearsals help actors understand timing, blocking, and emotion."],
+    ["What is method acting associated with?", ["Deep psychological connection to the role", "Only comedy", "Only camera movement", "Only box office"], "Deep psychological connection to the role", "Method-based approaches often focus on emotional truth and lived experience."],
+    ["What is a beat in acting?", ["A small shift in thought, emotion, or action", "A drum sound only", "A poster size", "A lens mark"], "A small shift in thought, emotion, or action", "Beats help actors track changes inside a scene."],
+    ["What is physicality?", ["How a character uses body, posture, and movement", "The camera resolution", "The release date", "The music rights"], "How a character uses body, posture, and movement", "Physicality can reveal age, status, fear, confidence, and personality."],
+    ["What is casting?", ["Choosing actors for roles", "Choosing locations", "Choosing lenses", "Choosing fonts"], "Choosing actors for roles", "Casting connects the right performer to the right character."],
+    ["What is a screen test?", ["A filmed audition to see how an actor works on camera", "A projector repair", "A script cover", "A ticket report"], "A filmed audition to see how an actor works on camera", "Screen tests help evaluate presence, chemistry, and suitability."],
+    ["What is emotional continuity?", ["Keeping a character's emotional state consistent across takes", "Making all scenes sad", "Copying the poster", "Using one camera"], "Keeping a character's emotional state consistent across takes", "Films are shot out of order, so actors must track emotional progression."],
+  ]},
+  "Film Theory": { icon:"📽️", desc:"Cinema history, movements, genres, semiotics, authorship, and analysis.", topics:[
+    ["What is auteur theory?", ["The idea that a director can be the author of a film", "A camera theory", "A budgeting method", "A ticket system"], "The idea that a director can be the author of a film", "Auteur theory studies recurring style and themes across a director's work."],
+    ["What is montage?", ["Editing shots together to create meaning", "A single uncut shot", "A casting method", "A poster design"], "Editing shots together to create meaning", "Montage creates meaning through the relationship between images."],
+    ["What is genre?", ["A category of film with shared conventions", "A camera setting", "A contract type", "A film stock"], "A category of film with shared conventions", "Genres help audiences understand expectations like horror, comedy, noir, or western."],
+    ["What is realism in cinema?", ["A style aiming to represent life believably", "Only fantasy", "Only animation", "Only musicals"], "A style aiming to represent life believably", "Realist cinema often uses natural performances, locations, and everyday situations."],
+    ["What is formalism?", ["Emphasizing style, structure, and cinematic form", "Ignoring style", "Only marketing", "Only acting"], "Emphasizing style, structure, and cinematic form", "Formalism highlights how editing, framing, sound, and design create meaning."],
+    ["What is semiotics?", ["The study of signs and meaning", "A lens mount", "A casting website", "A festival prize"], "The study of signs and meaning", "Film semiotics studies how images, symbols, and sounds communicate ideas."],
+    ["What is diegetic sound?", ["Sound that exists inside the story world", "Only soundtrack music", "Only narration", "Only silence"], "Sound that exists inside the story world", "Characters can usually hear diegetic sound, like footsteps or radio music in the scene."],
+    ["What is non-diegetic sound?", ["Sound outside the story world, like score", "Dialogue only", "A prop sound only", "A camera noise"], "Sound outside the story world, like score", "Non-diegetic sound is heard by the audience but not by characters."],
+    ["What is the French New Wave known for?", ["Experimentation, jump cuts, location shooting, and self-aware cinema", "Only superhero films", "Only silent films", "Only studio musicals"], "Experimentation, jump cuts, location shooting, and self-aware cinema", "The French New Wave challenged classical filmmaking rules."],
+    ["What is film noir associated with?", ["Crime, moral ambiguity, shadows, and pessimism", "Bright children's fantasy only", "Nature documentaries", "Cooking shows"], "Crime, moral ambiguity, shadows, and pessimism", "Noir often uses low-key lighting and cynical characters."],
+    ["What is intertextuality?", ["A film referring to or connecting with other texts", "Text messages in a film", "Only subtitles", "A ticket code"], "A film referring to or connecting with other texts", "Intertextuality creates meaning through references to other films, books, or culture."],
+    ["What is spectatorship?", ["How viewers experience and interpret a film", "How cameras are stored", "How actors audition", "How budgets are signed"], "How viewers experience and interpret a film", "Spectatorship examines audience position, identification, and interpretation."],
+  ]},
+  "Cinematography": { icon:"📸", desc:"Lighting, lenses, camera movement, exposure, composition, and visual language.", topics:[
+    ["What does a cinematographer do?", ["Creates the visual look of a film through camera and lighting", "Only writes dialogue", "Only sells tickets", "Only manages catering"], "Creates the visual look of a film through camera and lighting", "The cinematographer, or DP, shapes image, exposure, movement, and light."],
+    ["What is aperture?", ["The lens opening that controls light and depth of field", "A microphone type", "A script format", "A film genre"], "The lens opening that controls light and depth of field", "Aperture affects brightness and background blur."],
+    ["What is depth of field?", ["How much of the image appears in focus", "How deep the set is", "How long the script is", "How loud the scene is"], "How much of the image appears in focus", "Shallow depth isolates subjects; deep focus keeps more of the frame sharp."],
+    ["What is three-point lighting?", ["Key, fill, and back light", "Three cameras", "Three actors", "Three posters"], "Key, fill, and back light", "This classic setup shapes subject visibility, contrast, and separation."],
+    ["What is a wide-angle lens?", ["A lens that captures a broader field of view", "A lens only for close-ups", "A sound tool", "A budget term"], "A lens that captures a broader field of view", "Wide lenses exaggerate space and can make movement feel dynamic."],
+    ["What is a telephoto lens?", ["A lens that magnifies distant subjects and compresses space", "A lighting stand", "A script page", "A poster size"], "A lens that magnifies distant subjects and compresses space", "Telephoto lenses make backgrounds appear closer to subjects."],
+    ["What is color temperature?", ["The warmth or coolness of light measured in Kelvin", "A weather report", "An actor's makeup", "A ticket price"], "The warmth or coolness of light measured in Kelvin", "Color temperature helps match or contrast light sources."],
+    ["What is a dolly shot?", ["A shot where the camera moves on a wheeled platform", "A shot of a doll", "A poster image", "A legal term"], "A shot where the camera moves on a wheeled platform", "Dolly movement creates smooth physical camera movement."],
+    ["What is composition?", ["The arrangement of visual elements in the frame", "Only the film score", "Only the script", "Only the release plan"], "The arrangement of visual elements in the frame", "Composition directs attention and creates meaning."],
+    ["What is a Dutch angle?", ["A tilted camera angle", "A Dutch subtitle", "A flat shot", "A lens brand"], "A tilted camera angle", "Dutch angles can create unease, tension, or instability."],
+    ["What is dynamic range?", ["The range between darkest and brightest details captured", "The actor's movement range", "The budget range", "The music range only"], "The range between darkest and brightest details captured", "High dynamic range helps retain shadow and highlight detail."],
+    ["What is white balance?", ["Adjusting color so whites look neutral under different light", "Balancing props", "Balancing actor schedules", "Balancing sound only"], "Adjusting color so whites look neutral under different light", "White balance prevents unwanted color casts."],
+  ]},
+  "Marketing": { icon:"📣", desc:"Audience targeting, trailers, posters, campaigns, distribution, PR, and release strategy.", topics:[
+    ["What is film marketing?", ["Promoting a film to create audience awareness and demand", "Only editing scenes", "Only writing the script", "Only choosing lenses"], "Promoting a film to create audience awareness and demand", "Marketing helps audiences discover and want to watch a film."],
+    ["What is a trailer?", ["A short promotional video for a film", "A camera truck only", "A legal document", "A film budget"], "A short promotional video for a film", "Trailers communicate genre, story, stars, and emotional appeal."],
+    ["What is a target audience?", ["The specific viewers a film is made and marketed for", "A camera target", "A festival jury", "A prop list"], "The specific viewers a film is made and marketed for", "Good marketing starts with knowing who the film is trying to reach."],
+    ["What is a teaser?", ["An early short promo that creates curiosity", "A full movie", "A script outline", "A crew contract"], "An early short promo that creates curiosity", "Teasers build early awareness before the full campaign."],
+    ["What is a press junket?", ["A series of interviews with cast and crew for promotion", "A camera test", "A catering menu", "A location permit"], "A series of interviews with cast and crew for promotion", "Press junkets generate media coverage before release."],
+    ["What is word of mouth?", ["Audience recommendations and social sharing", "Only paid ads", "A poster format", "A sound effect"], "Audience recommendations and social sharing", "Positive word of mouth can become a powerful organic campaign."],
+    ["What is a premiere?", ["A first major screening used for publicity", "A camera lens", "A budget meeting", "A script note"], "A first major screening used for publicity", "Premieres attract press, photos, celebrities, and early reactions."],
+    ["What is a one-sheet?", ["The standard theatrical film poster", "A one-page script", "A soundtrack list", "A contract page"], "The standard theatrical film poster", "One-sheets are core visual marketing materials for films."],
+    ["What is a wide release?", ["Opening in many theaters at the same time", "A wide lens shot", "A private screening", "A festival-only release"], "Opening in many theaters at the same time", "Wide releases aim for broad audience access and strong opening box office."],
+    ["What is a limited release?", ["Opening first in fewer theaters, often to build buzz", "Only online release", "Only a trailer", "A low-budget shoot"], "Opening first in fewer theaters, often to build buzz", "Limited releases can expand after reviews and word of mouth grow."],
+    ["What is influencer marketing?", ["Using online personalities to promote a film", "Only print posters", "Only TV ads", "Only critics"], "Using online personalities to promote a film", "Influencers can reach specific communities with trusted voices."],
+    ["What is a film festival strategy?", ["Using festivals to gain buzz, reviews, awards, or distribution", "Only making posters", "Only hiring actors", "Only recording sound"], "Using festivals to gain buzz, reviews, awards, or distribution", "Festivals can launch a film's reputation and market value."],
+  ]}
+};
+
+const LEVELS = {
+  "Beginner": "Focus on essential definitions and basic professional vocabulary.",
+  "Intermediate": "Focus on practical understanding, workflows, and real industry use.",
+  "Advanced": "Focus on strategy, deeper analysis, and professional-level decisions."
+};
+
+function makeQuestions(section, level) {
+  const base = SECTIONS[section].topics;
+  const levelPrefix = level === "Beginner" ? "Basic check:" : level === "Intermediate" ? "Practical scenario:" : "Professional challenge:";
+  const qs = [];
+  for (let i = 0; i < 35; i++) {
+    const t = base[i % base.length];
+    let q = t[0];
+    let exp = t[3];
+    if (level === "Intermediate") {
+      q = t[0].replace("What is", "In production practice, what is").replace("What does", "In production practice, what does");
+      exp += " At an intermediate level, you should also understand how it affects collaboration and workflow.";
+    } else if (level === "Advanced") {
+      q = t[0].replace("What is", "Why is understanding").replace("What does", "Why does understanding");
+      if (!q.endsWith("?")) q += "?";
+      exp += " At an advanced level, connect the concept to creative, legal, financial, or audience impact.";
+    }
+    qs.push({
+      id: `${section.slice(0,2).toLowerCase()}-${level.slice(0,1).toLowerCase()}-${String(i+1).padStart(2,'0')}`,
+      question: `${levelPrefix} ${q}`,
+      options: shuffleArray([...t[1]], i),
+      correctAnswer: t[2],
+      explanation: exp
+    });
+  }
+  return qs;
+}
+function shuffleArray(arr, seed) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = (seed + i * 7) % (i + 1);
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+const QUESTIONS = {};
+Object.keys(SECTIONS).forEach(section => Object.keys(LEVELS).forEach(level => {
+  QUESTIONS[`${section}-${level}`] = makeQuestions(section, level);
+}));
+
+let selectedLevel = "";
+let selectedSection = "";
+let currentQuestions = [];
+let currentIndex = 0;
+let answers = [];
+let lastResult = null;
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const page = document.getElementById(id);
+  if (page) page.classList.add('active');
+  window.scrollTo(0, 0);
+}
+function goHome() { showPage('page-home'); }
+function startQuiz() { showPage('page-level'); }
+function selectLevel(level) {
+  selectedLevel = level;
+  document.getElementById('bc-level').textContent = level;
+  showPage('page-section');
+}
+function selectSection(section) {
+  selectedSection = section;
+  currentQuestions = QUESTIONS[`${section}-${selectedLevel}`] || makeQuestions(section, selectedLevel);
+  currentIndex = 0;
+  answers = Array(currentQuestions.length).fill(null);
+  document.getElementById('qz-section').textContent = section;
+  document.getElementById('qz-level').textContent = selectedLevel;
+  showPage('page-quiz');
+  renderQuestion();
+}
+function renderQuestion() {
+  const q = currentQuestions[currentIndex];
+  document.getElementById('warning-msg').style.display = 'none';
+  document.getElementById('q-number').textContent = `Question ${currentIndex + 1} of ${currentQuestions.length}`;
+  document.getElementById('q-text').textContent = q.question;
+  document.getElementById('progress-fill').style.width = `${((currentIndex + 1) / currentQuestions.length) * 100}%`;
+  document.getElementById('answered-count').textContent = `${answers.filter(Boolean).length}/${currentQuestions.length} answered`;
+  document.getElementById('btn-prev').disabled = currentIndex === 0;
+  document.getElementById('btn-prev').style.opacity = currentIndex === 0 ? .45 : 1;
+  document.getElementById('btn-next').innerHTML = currentIndex === currentQuestions.length - 1 ? '<span>Submit</span> ✓' : '<span>Next</span> →';
+  const wrap = document.getElementById('options');
+  wrap.innerHTML = '';
+  q.options.forEach((opt, idx) => {
+    const div = document.createElement('div');
+    div.className = 'option' + (answers[currentIndex] === opt ? ' selected' : '');
+    div.onclick = () => selectOption(opt);
+    div.innerHTML = `<div class="option-letter">${String.fromCharCode(65 + idx)}</div><div>${opt}</div>`;
+    wrap.appendChild(div);
+  });
+}
+function selectOption(option) { answers[currentIndex] = option; renderQuestion(); }
+function prevQuestion() { if (currentIndex > 0) { currentIndex--; renderQuestion(); } }
+function nextOrSubmit() {
+  if (currentIndex < currentQuestions.length - 1) { currentIndex++; renderQuestion(); return; }
+  if (answers.some(a => !a)) { document.getElementById('warning-msg').style.display = 'block'; return; }
+  submitQuiz();
+}
+function submitQuiz() {
+  const correct = currentQuestions.filter((q, i) => answers[i] === q.correctAnswer).length;
+  const total = currentQuestions.length;
+  const pct = Math.round((correct / total) * 100);
+  lastResult = { correct, total, pct };
+  document.getElementById('res-pct').textContent = `${pct}%`;
+  document.getElementById('res-correct').textContent = correct;
+  document.getElementById('res-wrong').textContent = total - correct;
+  document.getElementById('res-total').textContent = total;
+  document.getElementById('res-meta').textContent = `${selectedSection} • ${selectedLevel}`;
+  const title = pct >= 90 ? 'Excellent work!' : pct >= 75 ? 'Strong result!' : pct >= 60 ? 'Good start!' : 'Keep practicing!';
+  const msg = pct >= 90 ? 'You know this area like a serious film student.' : pct >= 75 ? 'You have a solid foundation. Review the missed questions.' : pct >= 60 ? 'You understand the basics, but there is room to grow.' : 'Review the explanations and try again.';
+  document.getElementById('res-title').textContent = title;
+  document.getElementById('res-msg').textContent = msg;
+  showPage('page-results');
+}
+function showReview() {
+  const list = document.getElementById('review-list');
+  document.getElementById('review-meta').textContent = `${selectedSection} • ${selectedLevel} • ${lastResult ? lastResult.pct : 0}% score`;
+  list.innerHTML = '';
+  currentQuestions.forEach((q, i) => {
+    const ok = answers[i] === q.correctAnswer;
+    const item = document.createElement('div');
+    item.className = 'review-item ' + (ok ? 'correct' : 'wrong');
+    item.innerHTML = `
+      <span class="review-badge ${ok ? 'badge-correct' : 'badge-wrong'}">${ok ? 'Correct' : 'Wrong'}</span>
+      <div class="review-q">${i + 1}. ${q.question}</div>
+      <div class="review-answers"><div><span class="ans-label">Your answer:</span><span class="${ok ? 'ans-correct' : 'ans-wrong'}">${answers[i] || 'No answer'}</span></div>
+      <div><span class="ans-label">Correct answer:</span><span class="ans-correct">${q.correctAnswer}</span></div></div>
+      <div class="review-exp">${q.explanation}</div>`;
+    list.appendChild(item);
+  });
+  showPage('page-review');
+}
+function confirmExit() {
+  if (confirm('Exit this quiz? Your answers will be lost.')) goHome();
+}
+</script>
+</body>
+</html>
